@@ -2,7 +2,11 @@ import Screening from "./Screening";
 import Money from "./Money";
 import DiscountCondition from "./DiscountCondition";
 
-abstract class DiscountPolicy {
+interface DiscountPolicy {
+  calculateDiscountAmount(screening: Screening): Money;
+}
+
+abstract class DefaultDiscountPolicy implements DiscountPolicy {
   private conditions: DiscountCondition[];
 
   protected constructor(...conditions: DiscountCondition[]) {
@@ -20,7 +24,7 @@ abstract class DiscountPolicy {
   protected abstract getDiscountAmount(screening: Screening): Money;
 }
 
-class AmountDiscountPolicy extends DiscountPolicy {
+class AmountDiscountPolicy extends DefaultDiscountPolicy {
   private readonly discountAmount: Money;
 
   constructor(discountAmount: Money, ...conditions: DiscountCondition[]) {
@@ -33,7 +37,7 @@ class AmountDiscountPolicy extends DiscountPolicy {
   }
 }
 
-class PercentDiscountPolicy extends DiscountPolicy {
+class PercentDiscountPolicy extends DefaultDiscountPolicy {
   private percent: number;
 
   constructor(percent: number, ...conditions: DiscountCondition[]) {
@@ -43,6 +47,12 @@ class PercentDiscountPolicy extends DiscountPolicy {
 
   protected getDiscountAmount(screening: Screening): Money {
     return screening.getMovieFee().times(this.percent);
+  }
+}
+
+class NoneDiscountPolicy implements DiscountPolicy {
+  calculateDiscountAmount(screening: Screening): Money {
+    return Money.ZERO;
   }
 }
 
